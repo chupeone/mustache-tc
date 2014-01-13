@@ -1,6 +1,10 @@
 package example;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +21,8 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.conf.PropertyConfiguration;
 public class TwitterInstanceCreator {
+	private Boolean initialized=false;
+	
 	private ConfigurationVariables confvar;
 	Map <Integer,TwitterInstanceExtended> twittstanceList;
 	public TwitterInstanceCreator(){
@@ -26,7 +32,7 @@ public class TwitterInstanceCreator {
 		System.out.println("construyendo");
 	    
 	    
-	    this.CreateFromFile("tokens.txt");
+	    
 //	  System.exit(0);
 //		TwitterFactory factory = new TwitterFactory();
 
@@ -64,6 +70,11 @@ public class TwitterInstanceCreator {
 	    } 
 	}
 	public Twitter getinstance(String callmethod){
+		if(!this.initialized)
+		{
+			this.CreateFromFile(this.confvar.getUserTokenFile());
+			this.initialized=true;
+		}
 		Random randomGenerator = new Random();
 		while(true)
 		{
@@ -99,17 +110,39 @@ public class TwitterInstanceCreator {
 			this.twittstanceList.get(i).refreshRateLimit();
 		}
 	}
-	public TwitterStream getStream()
+	public TwitterStream getStream(int appNumber)
 	{
+		String consumerkey=null,consumersecret=null,accesstoken=null,accesstokensecret=null;
+		try {
+			
+	        URL configurl = new URL("http://www.siix-inmobiliaria.com/TwitterTokens/gettokens.php?appid="+appNumber);
+	        System.out.println(configurl);
+	        BufferedReader br = new BufferedReader(
+	        new InputStreamReader(configurl.openStream()));
+			 consumerkey = br.readLine();
+			 consumersecret = br.readLine();
+			 accesstoken = br.readLine();
+			 accesstokensecret = br.readLine();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
-		  .setOAuthConsumerKey("5dwq8WizseBaevRxeIxMeg")
-		  .setOAuthConsumerSecret("obHDyUUn1kRbkm0PmdEjuoDHiBkAKsfjFl1Z6s0")
-		  .setOAuthAccessToken("15635263-r5lgrfWuq9gBDdDb0pk8VY3M33mYg7mN8yduaVaRj")
-		  .setOAuthAccessTokenSecret("zsNASoBJM41BxQaaW9JfOoLsfWNvDm2WVoGMnZfA6A");
+		  .setOAuthConsumerKey(consumerkey)
+		  .setOAuthConsumerSecret(consumersecret)
+		  .setOAuthAccessToken(accesstoken)
+		  .setOAuthAccessTokenSecret(accesstokensecret);
 		TwitterStreamFactory tsf = new TwitterStreamFactory(cb.build());
 		
 		return tsf.getInstance();
+		
 		
 	}
 

@@ -117,8 +117,9 @@ public class search {
 				}
 	        };
 
+	        TwitterInstanceCreator tic=new TwitterInstanceCreator();
 	        
-	        TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
+	      
 	        RawStreamListener rawst=new RawStreamListener(){
 	        	public Double count=0d;
 	        	public Double lengthsum=0d;
@@ -193,6 +194,7 @@ public class search {
 	      //  String[] searchfor={"flu", "influenza", "fever", "cough", "sore", "throat", "sore throat", "headache"};
 	     //   FilterQuery query=new FilterQuery();
 	     //   query.track(searchfor);
+	        TwitterStream twitterStream = tic.getStream();
 	        twitterStream.addListener(listener);
 	       // twitterStream.filter(query);
 	        

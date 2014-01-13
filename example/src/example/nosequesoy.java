@@ -1,5 +1,8 @@
 package example;
 
+import java.util.Calendar;
+import twitter4j.Twitter;
+
 public class nosequesoy {
 
 	/**
@@ -7,7 +10,11 @@ public class nosequesoy {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		System.out.println("ay wey");
+ConfigurationVariables confvar=new ConfigurationVariables();
+confvar.createstructure();
+  	
+
+      
 
 	}
 

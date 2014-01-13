@@ -78,7 +78,7 @@ public class RawStreamListenerImplementation implements RawStreamListener {
 		try {
 			
 			
-
+			System.out.println(message);
 			this.bw.write(message+"\n");
 			this.bw.flush();
 

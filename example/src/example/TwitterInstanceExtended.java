@@ -9,6 +9,7 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 
 public class TwitterInstanceExtended {
@@ -18,8 +19,12 @@ public 	Map<String,Integer> ratelimitsRemaining;
 public Integer timesCalledSinceLastRefresh;
 public boolean connected;
 TwitterInstanceExtended(AccessToken accessToken){
-	TwitterFactory factory = new TwitterFactory();
 
+	ConfigurationBuilder cb = new ConfigurationBuilder();
+	cb.setDebugEnabled(true)
+	.setJSONStoreEnabled(true)
+;
+	TwitterFactory factory = new TwitterFactory(cb.build());
     this.twittstance = factory.getInstance();
     this.twittstance.setOAuthConsumer("ABykWUVGjbvAdW2Ix0Ouw", "yJ6rnyBNrqeGQyJqG0Y1z8YijMmhbOOPGVOLTdrTo");
     this.twittstance.setOAuthAccessToken(accessToken);
@@ -81,6 +86,7 @@ String callmethodabreviated(String callmethod){
 	if(callmethod=="user tweets"){return "/statuses/user_timeline";}
 	if(callmethod=="user followers"){return "/followers/ids";}
 	if(callmethod=="user friends"){return "/friends/ids";}
+	if(callmethod=="users lookup"){return "/users/lookup";}
 	return callmethod;
 }
 }
