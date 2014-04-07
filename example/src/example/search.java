@@ -194,7 +194,7 @@ public class search {
 	      //  String[] searchfor={"flu", "influenza", "fever", "cough", "sore", "throat", "sore throat", "headache"};
 	     //   FilterQuery query=new FilterQuery();
 	     //   query.track(searchfor);
-	        TwitterStream twitterStream = tic.getStream();
+	        TwitterStream twitterStream = tic.getStream(1);
 	        twitterStream.addListener(listener);
 	       // twitterStream.filter(query);
 	        

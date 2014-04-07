@@ -27,7 +27,7 @@ public class JustSampling {
    
 	    RawStreamListener listener = new RawStreamListenerImplementation();
 
-	    TwitterStream twitterStream = new TwitterInstanceCreator().getStream();
+	    TwitterStream twitterStream = new TwitterInstanceCreator().getStream(1);
 	    twitterStream.addListener(listener);
 	    // sample() method internally creates a thread which manipulates TwitterStream and calls these adequate listener methods continuously.
 	    twitterStream.sample();

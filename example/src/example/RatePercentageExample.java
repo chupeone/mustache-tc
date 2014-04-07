@@ -24,7 +24,7 @@
 
 				        Twitter twitter = tic.getinstance("user tweets");
 			            statuses = twitter.getUserTimeline("arturoelias", paging);
-				        System.out.println(twitter.getScreenName());
+				     //   System.out.println(twitter.getScreenName());
 			            for (Status s : statuses) {
 			            	counter++;
 			                System.out.println(counter+" "+s.getUser().getScreenName()+"////"+s.getText()+"///"+s.getCreatedAt());

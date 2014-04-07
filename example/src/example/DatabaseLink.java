@@ -13,14 +13,17 @@ import org.postgresql.util.PSQLException;
 
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
+import twitter4j.TwitterException;
 import twitter4j.User;
+import twitter4j.json.DataObjectFactory;
 
 public class DatabaseLink {
 	Integer BatchUserCounter=0;
+	Integer BatchEdgeCounter=0;
 	Integer BatchStatusCounter=0;
 	Integer TotalStatusCounter=0;
 	Connection connection = null;
-	PreparedStatement psUserCm,psStatusCm,psUser,psStatus;
+	PreparedStatement psUserCm,psStatusCm,psUser,psStatus,psEdge;
 	public Integer collectionMethod=null;
 	public Logging logger=new Logging();
 	ConfigurationVariables confvar=new ConfigurationVariables();
@@ -37,10 +40,13 @@ public class DatabaseLink {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("no me conecto");
 		}
 
 	
 		try {
+			this.psEdge = this.connection
+					.prepareStatement("INSERT INTO follows (id_followed,id_follower) VALUES (?, ?)");
 			this.psUserCm = this.connection
 					.prepareStatement("INSERT INTO user_collections("
 	          +  "collection_method_id, twitter_user_id)"
@@ -61,6 +67,20 @@ public class DatabaseLink {
 					.prepareStatement("INSERT INTO tweet_collections("
 	          +  "collection_method_id,tweet_id)"
 	   + "VALUES (?, ?)");
+		
+		
+		if(this.collectionMethod==666){
+			this.psUser = this.connection
+					.prepareStatement("INSERT INTO users42m("
+							+ "twitter_user_id, created_at, description, screen_name, name, "
+							+ "location, statuses_count,JSON)"
+							+ "VALUES (?, ?, ?, ?, ?, " + "?, ?,?);");
+		}
+		
+		
+		
+		
+		
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -68,7 +88,29 @@ public class DatabaseLink {
 
 
 	}
-
+	public void insertEdge(long followed,long follower){
+		try {
+			this.psEdge.setLong(1, followed);
+			this.psEdge.setLong(2, follower);
+			this.psEdge.addBatch();
+			this.BatchEdgeCounter++;
+			
+			if(this.BatchEdgeCounter>=5000)
+			{
+				this.BatchEdgeCounter=0;
+				try{
+				this.psEdge.executeBatch();
+				}catch(BatchUpdateException esql){
+					System.out.println(esql.getMessage());
+				}
+				
+				
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void insertuser(User user,Boolean encode) {
 
 		ResultSet resultSet = null;
@@ -145,6 +187,69 @@ public class DatabaseLink {
 					
 				}
 				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+	public void insertuserwithJSON(String userJSON,Boolean encode) {
+
+		ResultSet resultSet = null;
+		Statement statement = null;
+
+		try {
+
+			User user=null;
+			try{
+				user = DataObjectFactory.createUser(userJSON);
+			}catch(TwitterException twe){
+				System.out.println(twe.getErrorMessage());
+			}
+			
+
+			@SuppressWarnings("deprecation")
+			java.sql.Date sqlDate = new java.sql.Date(user.getCreatedAt()
+					.getTime());
+			if(!encode)
+			{
+				this.psUser.setLong(1, user.getId());
+				this.psUser.setDate(2, sqlDate);
+				this.psUser.setString(3, user.getDescription());
+				this.psUser.setString(4, user.getScreenName());
+				this.psUser.setString(5, user.getName());
+				this.psUser.setString(6, user.getLocation());
+				this.psUser.setInt(7, user.getStatusesCount());
+				this.psUser.setString(8, userJSON);
+			
+			}else{
+				this.psUser.setLong(1, user.getId());
+				this.psUser.setDate(2, sqlDate);
+			if(user.getDescription()==null){this.psUser.setNull(3,Types.VARCHAR);}else this.psUser.setString(3, user.getDescription().getBytes("UTF-8").toString());
+			if(user.getScreenName()==null){this.psUser.setNull(4,Types.VARCHAR);}else this.psUser.setString(4, user.getScreenName().getBytes("UTF-8").toString());
+			if(user.getName()==null){this.psUser.setNull(5,Types.VARCHAR);}else this.psUser.setString(5, user.getName().getBytes("UTF-8").toString());
+			if(user.getLocation()==null){this.psUser.setNull(6,Types.VARCHAR);}else this.psUser.setString(6, user.getLocation().getBytes("UTF-8").toString());
+			this.psUser.setInt(7, user.getStatusesCount());
+			this.psUser.setString(8, userJSON);
+		
+	}	
+
+
+			try {
+				
+				this.psUser.addBatch();
+
+				if(this.BatchUserCounter>=500){
+			//		System.out.println("Executing");
+					this.psUser.executeBatch();
+					this.BatchUserCounter=0;
+				}else this.BatchUserCounter++;
+			} catch (BatchUpdateException esql_1) {
+				PSQLException esql=(PSQLException) ((java.sql.BatchUpdateException) esql_1).getNextException();
+				System.out.println(esql.getMessage());
+				System.out.println("asdasdasd");
+
 			}
 
 		} catch (Exception e) {
@@ -266,6 +371,40 @@ public class DatabaseLink {
 	protected void finalize()  
 	{  Status status=null;
 	this.insertTweet(status, true);
+	    try { this.connection.close(); 
+	    super.finalize();  } 
+	    catch (Throwable e) { 
+	        e.printStackTrace();
+	    }
+	    
+	}
+	protected void finalizeUsersOnly()  
+	{  Status status=null;
+
+		try {
+			this.psUser.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+		}
+	
+	    try { this.connection.close(); 
+	    super.finalize();  } 
+	    catch (Throwable e) { 
+	        e.printStackTrace();
+	    }
+	    
+	}
+	protected void finalizeEdgessOnly()  
+	{  Status status=null;
+
+		try {
+			this.psEdge.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+		}
+	
 	    try { this.connection.close(); 
 	    super.finalize();  } 
 	    catch (Throwable e) { 

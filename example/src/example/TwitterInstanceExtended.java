@@ -23,10 +23,30 @@ TwitterInstanceExtended(AccessToken accessToken){
 	ConfigurationBuilder cb = new ConfigurationBuilder();
 	cb.setDebugEnabled(true)
 	.setJSONStoreEnabled(true)
+	.setUseSSL(true)
+	.setHttpReadTimeout(300000)
 ;
 	TwitterFactory factory = new TwitterFactory(cb.build());
     this.twittstance = factory.getInstance();
     this.twittstance.setOAuthConsumer("ABykWUVGjbvAdW2Ix0Ouw", "yJ6rnyBNrqeGQyJqG0Y1z8YijMmhbOOPGVOLTdrTo");
+    this.twittstance.setOAuthAccessToken(accessToken);
+    
+    this.refreshRateLimit();
+    this.timesCalledSinceLastRefresh=0;
+    this.ratelimitsRemaining=(Map<String,Integer>) new HashMap();
+    this.syncRateLimits();
+}
+TwitterInstanceExtended(AccessToken accessToken,String consumerkey,String consumersecret){
+
+	ConfigurationBuilder cb = new ConfigurationBuilder();
+	cb.setDebugEnabled(true)
+	.setJSONStoreEnabled(true)
+	.setUseSSL(true)
+	.setHttpReadTimeout(300000)
+;
+	TwitterFactory factory = new TwitterFactory(cb.build());
+    this.twittstance = factory.getInstance();
+    this.twittstance.setOAuthConsumer(consumerkey, consumersecret);
     this.twittstance.setOAuthAccessToken(accessToken);
     
     this.refreshRateLimit();
@@ -61,7 +81,8 @@ void refreshRateLimit(){
 Float rateLimitForCall(String callmethod){
 	String key=callmethodabreviated(callmethod);
 	   RateLimitStatus value = this.ratelimits.get(key)  ;
-
+if(ConfigurationVariables.isDebugging())
+{
 	   try {
 		System.out.println(key + "////" + value.getRemaining()+"///"+value.getLimit()+"///"+this.ratelimitsRemaining.get(key)+" "+(this.ratelimitsRemaining.get(key)+0f/value.getLimit())+"---"+this.twittstance.getScreenName());
 	} catch (IllegalStateException e) {
@@ -71,6 +92,7 @@ Float rateLimitForCall(String callmethod){
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}  
+}
 	   return (float) (this.ratelimitsRemaining.get(key)*100f/value.getLimit());
 }
 void informCall(String callmethod){

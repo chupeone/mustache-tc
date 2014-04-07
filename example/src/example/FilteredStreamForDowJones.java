@@ -29,7 +29,7 @@ public class FilteredStreamForDowJones {
 	    RawStreamListener listener = new RawStreamListenerImplementation();
 
 	    TwitterStream twitterStream = new TwitterInstanceCreator().getStream(10);
-        String[] searchfor={"3M","American Express","AT&T","Boeing","Caterpillar","Chevron","Cisco Systems","Coca-Cola","DuPont","Exxon Mobil","General Electric","Goldman Sachs","Home Depot","intel","ibm","johnson johnson"," jpmorgan chase","mcdonalds","merck","microsoft","nike","pfizer","proctes gamble","travelers","united health group","united technologies","verizon","visa","wal mart","walt disney"};
+        String[] searchfor={"3M","American Express","amex,","AT&T","Boeing","Caterpillar","Chevron","Cisco","Coca Cola","DuPont","Exxon","General Electric","Goldman Sachs","Home Depot","intel","ibm","johnson johnson"," jpmorgan","mcdonalds","merck","microsoft","nike","pfizer","procter","travelers","united health group","united technologies","verizon","visa","wal mart","walt disney","disney"};
         FilterQuery query=new FilterQuery();
         query.track(searchfor);
         twitterStream.addListener(listener);
